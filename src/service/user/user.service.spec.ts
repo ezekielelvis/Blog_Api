@@ -28,11 +28,6 @@ describe('UserService', () => {
     password: 'password123',
   };
 
-  const mockUpdateUserDto = {
-    field: 'username' as const,
-    value: 'newUsername',
-  };
-
   // const mockPost = {
   //   id: '1',
   //   title: 'Test Post',
@@ -155,21 +150,37 @@ describe('UserService', () => {
   });
 
   describe('updateUser', () => {
+    it('should be defined', () => {
+      expect(service).toBeDefined();
+    });
+
     it('should update a user', async () => {
+      const updateUserDto = {
+        email: 'updated@example.com',
+        username: 'Updated User',
+      };
+      const updatedUser = {
+        email: 'updated@example.com',
+        username: 'Updated User',
+      };
+
       mockSupabaseClient.single.mockResolvedValue({
-        data: mockUser,
+        data: updatedUser,
         error: null,
       });
 
-      const result = await service.updateUser(mockUpdateUserDto, '123');
+      const result = await service.upDateUser(updateUserDto, '123');
 
       expect(mockSupabaseClient.from).toHaveBeenCalledWith('users');
-      expect(mockSupabaseClient.update).toHaveBeenCalled();
+      expect(mockSupabaseClient.update).toHaveBeenCalledWith({
+        email: 'updated@example.com',
+        username: 'Updated User',
+      });
       expect(mockSupabaseClient.eq).toHaveBeenCalledWith('id', '123');
-      expect(result).toEqual(mockUser);
+      expect(mockSupabaseClient.single).toHaveBeenCalled();
+      expect(result).toEqual(updatedUser);
     });
   });
-
   describe('delete', () => {
     it('should delete a user', async () => {
       mockSupabaseClient.from.mockReturnThis();

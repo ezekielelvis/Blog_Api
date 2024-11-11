@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { createClient } from '@supabase/supabase-js';
 import { ConfigService } from '@nestjs/config';
-import { IUser } from '../../interface/userInterface';
+import { IUser } from '../../interface/user.entity';
 import { CreateUser } from '../../dto/create-user.dto';
 import { UpdateUserDto } from '../../dto/update-user.dto';
 
@@ -57,17 +57,26 @@ export class UserService {
     return data as IUser[];
   }
 
-  async updateUser(updateUserDto: UpdateUserDto, id: string): Promise<IUser> {
-    const updateValue = updateUserDto.value;
+  async upDateUser(upDateUser: UpdateUserDto, id: string): Promise<IUser> {
+    const updateData: Partial<IUser> = {};
+
+    if (upDateUser.email) {
+      updateData.email = upDateUser.email;
+    }
+    if (upDateUser.username) {
+      updateData.username = upDateUser.username;
+    }
+    if (upDateUser.password) {
+      updateData.password = await bcrypt.hash(upDateUser.password, 10);
+    }
 
     const { data, error } = await this.supabase
       .from('users')
-      .update({ [updateUserDto.field]: updateValue })
+      .update(updateData)
       .eq('id', id)
       .single();
 
     if (error) throw error;
-
     return data as IUser;
   }
 

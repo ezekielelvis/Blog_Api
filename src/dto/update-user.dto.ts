@@ -1,4 +1,5 @@
 export class UpdateUserDto {
-  field: 'email' | 'username' | 'password';
-  value: string;
+  username?: string;
+  email?: string;
+  password?: string;
 }

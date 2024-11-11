@@ -1,4 +1,4 @@
-export class Comment {
+export interface IComment {
   id: string;
   content: string;
   user_id: string;
