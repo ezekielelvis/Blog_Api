@@ -7,7 +7,7 @@ import { UpdatePostDto } from 'src/dto/update-post.dto';
 
 @Injectable()
 export class PostService {
-  private supabase;
+  private readonly supabase;
 
   constructor(private readonly configService: ConfigService) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');

@@ -1,0 +1,28 @@
+// example.controller.ts
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Throttle } from './decorators/rate-limit.decorator';
+import { CustomThrottlerGuard } from './guards/custom-throttler.guard';
+
+@Controller('example')
+@UseGuards(CustomThrottlerGuard)
+export class ExampleController {
+  // Default rate limiting
+  @Get()
+  findAll() {
+    return 'This route uses default rate limiting';
+  }
+
+  // Custom rate limiting for specific endpoint
+  @Throttle(5, 30)
+  @Get('limited')
+  getLimited() {
+    return 'This route has custom rate limiting';
+  }
+
+  // Skip rate limiting
+  @Throttle(0, 0)
+  @Get('unlimited')
+  getUnlimited() {
+    return 'This route bypasses rate limiting';
+  }
+}

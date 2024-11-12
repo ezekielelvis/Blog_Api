@@ -6,7 +6,6 @@ import { CreateUser } from '../../dto/create-user.dto';
 import { UpdateUserDto } from '../../dto/update-user.dto';
 
 import * as bcrypt from 'bcrypt';
-// import { IPost } from 'src/interface/postInterface';
 
 @Injectable()
 export class UserService {
@@ -91,24 +90,4 @@ export class UserService {
     }
     return data as IUser;
   }
-
-  // async findUserPosts(userId: string): Promise<IPost[]> {
-  //   const { data, error } = await this.supabase
-  //     .from('posts')
-  //     .select(
-  //       `
-  //     *,
-  //     category:categories(id, name),
-  //     user:users(id, username),
-  //     comments:comments(count)
-  //   `,
-  //     )
-  //     .eq('id', userId)
-  //     .order('created_at', { ascending: false });
-
-  //   if (error) {
-  //     throw new Error(error.message);
-  //   }
-  //   return data as IPost[];
-  // }
 }
