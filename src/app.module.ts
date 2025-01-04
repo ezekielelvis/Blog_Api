@@ -1,33 +1,47 @@
+// src/app.module.ts
+
 import { Module } from '@nestjs/common';
-import { CacheModule } from '@nestjs/cache-manager';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
-import cacheConfig from './config/cache.config';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { throttlerConfig } from './config/throttler.config';
-import { APP_GUARD } from '@nestjs/core';
-import { redisStore } from './config/redis-store.config';
+import { configuration } from './config/configuration';
+import { validate } from './config/env.validation';
+import { RedisStoreService } from './service/redis/redis-store.service';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { CustomThrottlerGuard } from './guards/throttler.guard';
+import { LoggingInterceptor } from './interceptors/logging.interceptor';
 
 @Module({
   imports: [
     AuthModule,
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
-    CacheModule.registerAsync({
-      useFactory: async () => cacheConfig,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+      load: [configuration],
+      validate,
     }),
-    ThrottlerModule.forRoot({
-      ...throttlerConfig,
-      storage: redisStore,
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): ThrottlerModuleOptions => ({
+        ttl: config.get<number>('THROTTLE_TTL') || 60,
+        limit: config.get<number>('THROTTLE_LIMIT') || 10,
+      }),
     }),
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    RedisStoreService,
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: CustomThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
     },
   ],
 })
